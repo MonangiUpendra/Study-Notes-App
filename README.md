@@ -1,6 +1,6 @@
 # 📚 Study Notes App
 
-**Study Notes App** is a clean, minimal Android application built using **Jetpack Compose** and **Firebase**. It allows users to register, log in, write notes, and view their personal note history.
+**StudyNoters** is a clean and minimal Android application built using **Jetpack Compose** and **Firebase**. It allows users to register, log in, write notes, and view their personal note history with reminder and notification features.
 
 ---
 
@@ -8,10 +8,12 @@
 
 - 🔐 Firebase Authentication (Email & Password)
 - ➕ Create and save notes
+- 🕑 Set reminders using AlarmManager
+- 🔔 Receive notifications via Firebase Cloud Messaging (FCM)
 - 📖 View personal note history
-- 🔁 Logout support
-- 🎨 Modern UI with Jetpack Compose
-- 🔄 Realtime data via Firebase Firestore
+- 🔁 Logout functionality
+- 🔄 Real-time sync with Firebase Firestore
+- 🎨 Built using modern Jetpack Compose UI
 
 ---
 
@@ -20,20 +22,17 @@
 | Technology         | Purpose                          |
 |--------------------|----------------------------------|
 | Kotlin             | Programming Language             |
-| Jetpack Compose    | UI Toolkit                       |
+| Jetpack Compose    | Declarative UI Toolkit            |
 | Firebase Auth      | User Authentication              |
-| Firebase Firestore | Cloud-based NoSQL Storage        |
+| Firebase Firestore | Cloud-based NoSQL Data Storage   |
+| FCM (Messaging)    | Push Notifications               |
+| AlarmManager       | Reminder Scheduling              |
+| Navigation Compose | Screen Navigation                |
 | Android Studio     | Development Environment          |
-| Navigation Compose | Navigation between screens       |
 
----
 
-## 📂 Screens Included
 
-- Splash Screen
-- Login Screen
-- Register Screen
-- Home Screen
-- Add Note Screen
-- Notes List (History)
-- Logout
+
+
+
+
