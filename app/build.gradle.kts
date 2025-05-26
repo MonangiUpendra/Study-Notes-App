@@ -74,4 +74,7 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.6")
 
+    implementation("com.google.firebase:firebase-messaging:23.4.0")// or latest
+
+
 }

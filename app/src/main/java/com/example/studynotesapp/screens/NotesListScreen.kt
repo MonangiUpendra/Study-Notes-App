@@ -1,118 +1,117 @@
 package com.example.studynotesapp.screens
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.BackHandler
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment // ✅ Import for Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.studynotesapp.model.Note
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+
+// ✅ Updated Note data class with hasReminder
+data class Note(
+    var id: String = "",
+    val title: String = "",
+    val content: String = "",
+    val hasReminder: Boolean = false
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesListScreen(navController: NavController) {
-    val notes = remember { mutableStateListOf<Note>() }
+    val context = LocalContext.current
     val db = FirebaseFirestore.getInstance()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
-    val context = LocalContext.current
-    val activity = (context as? Activity)
 
-    var isLoading by remember { mutableStateOf(true) }
+    var notes by remember { mutableStateOf(listOf<Note>()) }
 
-    BackHandler {
-        navController.popBackStack() // Back to home screen
-    }
-
-    // Fetch notes
-    LaunchedEffect(true) {
-        userId?.let {
+    LaunchedEffect(userId) {
+        userId?.let { uid ->
             db.collection("users")
-                .document(it)
+                .document(uid)
                 .collection("notes")
-                .orderBy("timestamp")
-                .get()
-                .addOnSuccessListener { result ->
-                    notes.clear()
-                    for (document in result) {
-                        val note = Note(
-                            id = document.id,
-                            title = document.getString("title") ?: "",
-                            content = document.getString("content") ?: ""
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null || snapshot == null) return@addSnapshotListener
+
+                    val noteList = snapshot.documents.map { doc ->
+                        Note(
+                            id = doc.id,
+                            title = doc.getString("title") ?: "",
+                            content = doc.getString("content") ?: "",
+                            hasReminder = doc.getBoolean("hasReminder") ?: false
                         )
-                        notes.add(note)
                     }
-                    isLoading = false
+                    notes = noteList
                 }
         }
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("📒 Your Notes") },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(Icons.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        // Logout and exit app
-                        FirebaseAuth.getInstance().signOut()
-                        activity?.finishAffinity()  // Close all activities
-                        val intent = Intent(Intent.ACTION_MAIN).apply {
-                            addCategory(Intent.CATEGORY_HOME)
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        }
-                        context.startActivity(intent)  // Go to device home screen
-                    }) {
-                        Icon(Icons.Filled.ExitToApp, contentDescription = "Exit")
-                    }
-                }
-            )
+            TopAppBar(title = { Text("Your Notes") })
         }
     ) { padding ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
-                items(notes) { note ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        elevation = CardDefaults.cardElevation(4.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            items(notes) { note ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+
+                        // ✅ Title + Reminder Icon
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(text = note.title, style = MaterialTheme.typography.titleMedium)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = note.content, style = MaterialTheme.typography.bodyMedium)
+                            if (note.hasReminder) {
+                                Text("⏰", fontSize = 18.sp)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = note.content, style = MaterialTheme.typography.bodyMedium)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            IconButton(onClick = {
+                                userId?.let { uid ->
+                                    db.collection("users")
+                                        .document(uid)
+                                        .collection("notes")
+                                        .document(note.id)
+                                        .delete()
+                                        .addOnSuccessListener {
+                                            Toast.makeText(context, "🗑️ Note deleted", Toast.LENGTH_SHORT).show()
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(context, "❌ Failed to delete", Toast.LENGTH_SHORT).show()
+                                        }
+                                }
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete Note")
+                            }
                         }
                     }
                 }
