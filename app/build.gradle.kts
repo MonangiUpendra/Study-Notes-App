@@ -76,5 +76,10 @@ dependencies {
 
     implementation("com.google.firebase:firebase-messaging:23.4.0")// or latest
 
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+
+
 
 }

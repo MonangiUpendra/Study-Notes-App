@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.studynotesapp.screens.*
 import com.example.studynotesapp.ui.theme.StudyNotesAppTheme
+import com.example.studynotesapp.ThemePreference
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 
@@ -24,6 +25,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // ✅ Load saved dark mode preference and apply it
+        val isDarkMode = ThemePreference.isNightMode(this)
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+            if (isDarkMode)
+                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+            else
+                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+        )
 
         // ✅ Request Notification Permission for Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -63,7 +73,9 @@ class MainActivity : ComponentActivity() {
 
         // ✅ Compose UI Setup
         setContent {
-            StudyNotesAppTheme {
+            StudyNotesAppTheme(
+                darkTheme = isDarkMode // Apply dark mode based on saved preference
+            ) {
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = "splash") {
                     composable("splash") { SplashScreen(navController) }
@@ -72,6 +84,7 @@ class MainActivity : ComponentActivity() {
                     composable("home") { HomeScreen(navController) }
                     composable("addNote") { AddNoteScreen(navController) }
                     composable("notes") { NotesListScreen(navController) }
+                    composable("settings") { SettingsScreen(navController) }
                 }
             }
         }

@@ -1,7 +1,6 @@
 package com.example.studynotesapp.screens
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,9 +19,7 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun LoginScreen(
-    navController: NavController
-) {
+fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -34,9 +31,9 @@ fun LoginScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        MaterialTheme.colorScheme.surface
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        MaterialTheme.colorScheme.background
                     )
                 )
             ),
@@ -47,7 +44,10 @@ fun LoginScreen(
                 .fillMaxWidth(0.9f)
                 .padding(24.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -57,8 +57,7 @@ fun LoginScreen(
                 Text(
                     text = "Login",
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
+                        fontWeight = FontWeight.Bold
                     )
                 )
 
@@ -85,7 +84,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                AnimatedVisibility(visible = errorMessage.isNotEmpty()) {
+                if (errorMessage.isNotEmpty()) {
                     Text(
                         text = errorMessage,
                         color = MaterialTheme.colorScheme.error,
@@ -108,13 +107,7 @@ fun LoginScreen(
                             .signInWithEmailAndPassword(trimmedEmail, trimmedPassword)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
-                                    Toast.makeText(
-                                        context,
-                                        "Login Successful!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                    // ✅ Navigate to "home" and clear backstack up to login
+                                    Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
                                     navController.navigate("home") {
                                         popUpTo("login") { inclusive = true }
                                     }
@@ -123,9 +116,10 @@ fun LoginScreen(
                                 }
                             }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Login")
+                    Text("Login", style = MaterialTheme.typography.labelLarge)
                 }
 
                 TextButton(onClick = {

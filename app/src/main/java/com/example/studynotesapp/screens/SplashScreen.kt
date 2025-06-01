@@ -20,7 +20,7 @@ import androidx.navigation.NavController
 
 @Composable
 fun SplashScreen(navController: NavController) {
-    // Automatically navigate to login after 2 seconds
+    // Navigate after 2 seconds
     LaunchedEffect(Unit) {
         Handler(Looper.getMainLooper()).postDelayed({
             navController.navigate("login") {
@@ -45,7 +45,7 @@ fun SplashScreen(navController: NavController) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "📚 Study Notes App",
+            text = "📚 StudyNoters",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onPrimaryContainer,
