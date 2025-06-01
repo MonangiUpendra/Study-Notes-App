@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
@@ -15,7 +14,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.studynotesapp.screens.*
 import com.example.studynotesapp.ui.theme.StudyNotesAppTheme
-import com.example.studynotesapp.ThemePreference
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 
@@ -26,7 +24,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // ✅ Load saved dark mode preference and apply it
+        // Apply saved dark mode preference
         val isDarkMode = ThemePreference.isNightMode(this)
         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
             if (isDarkMode)
@@ -35,7 +33,7 @@ class MainActivity : ComponentActivity() {
                 androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
         )
 
-        // ✅ Request Notification Permission for Android 13+
+        // Request notification permission (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -50,32 +48,27 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // ✅ Initialize Firebase
+        // Initialize Firebase
         val firebaseApp = FirebaseApp.initializeApp(this)
         if (firebaseApp != null) {
-            Toast.makeText(this, "✅ Firebase Connected!", Toast.LENGTH_LONG).show()
-            Log.d("FIREBASE", "Firebase initialized successfully")
+            Log.d("FIREBASE", "✅ Firebase initialized successfully")
         } else {
-            Toast.makeText(this, "❌ Firebase Not Connected!", Toast.LENGTH_LONG).show()
-            Log.e("FIREBASE", "Firebase initialization failed")
+            Log.e("FIREBASE", "❌ Firebase initialization failed")
         }
 
-        // ✅ Get FCM Token
+        // Fetch FCM Token silently
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val token = task.result
                 Log.d("FCM_TOKEN", "🔥 FCM Token: $token")
-                Toast.makeText(this, "FCM Token fetched. Check Logcat.", Toast.LENGTH_SHORT).show()
             } else {
                 Log.e("FCM_TOKEN", "❌ Failed to get token", task.exception)
             }
         }
 
-        // ✅ Compose UI Setup
+        // Compose UI
         setContent {
-            StudyNotesAppTheme(
-                darkTheme = isDarkMode // Apply dark mode based on saved preference
-            ) {
+            StudyNotesAppTheme(darkTheme = isDarkMode) {
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = "splash") {
                     composable("splash") { SplashScreen(navController) }
@@ -85,6 +78,12 @@ class MainActivity : ComponentActivity() {
                     composable("addNote") { AddNoteScreen(navController) }
                     composable("notes") { NotesListScreen(navController) }
                     composable("settings") { SettingsScreen(navController) }
+
+                    // ✅ New: Edit Note route
+                    composable("editNote/{noteId}") { backStackEntry ->
+                        val noteId = backStackEntry.arguments?.getString("noteId") ?: ""
+                        EditNoteScreen(navController, noteId)
+                    }
                 }
             }
         }

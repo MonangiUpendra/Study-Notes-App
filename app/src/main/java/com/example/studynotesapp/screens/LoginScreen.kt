@@ -24,6 +24,10 @@ fun LoginScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
+    // 👉 Added for Forgot Password Dialog
+    var showResetDialog by remember { mutableStateOf(false) }
+    var resetEmail by remember { mutableStateOf("") }
+
     val context = LocalContext.current
 
     Box(
@@ -122,12 +126,62 @@ fun LoginScreen(navController: NavController) {
                     Text("Login", style = MaterialTheme.typography.labelLarge)
                 }
 
+                // 👉 Forgot Password Button
+                TextButton(onClick = {
+                    resetEmail = email // Pre-fill if user already typed
+                    showResetDialog = true
+                }) {
+                    Text("Forgot Password?")
+                }
+
                 TextButton(onClick = {
                     navController.navigate("register")
                 }) {
                     Text("Don't have an account? Register")
                 }
             }
+        }
+
+        // 👉 Forgot Password Alert Dialog
+        if (showResetDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetDialog = false },
+                title = { Text("Reset Password") },
+                text = {
+                    OutlinedTextField(
+                        value = resetEmail,
+                        onValueChange = { resetEmail = it },
+                        label = { Text("Enter your email") },
+                        singleLine = true
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (resetEmail.isNotBlank()) {
+                                FirebaseAuth.getInstance().sendPasswordResetEmail(resetEmail.trim())
+                                    .addOnSuccessListener {
+                                        Toast.makeText(context, "Reset link sent!", Toast.LENGTH_SHORT).show()
+                                        showResetDialog = false
+                                        resetEmail = ""
+                                    }
+                                    .addOnFailureListener {
+                                        Toast.makeText(context, "Error: ${it.localizedMessage}", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                Toast.makeText(context, "Please enter a valid email", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ) {
+                        Text("Send")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.studynotesapp.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -81,7 +82,10 @@ fun NotesListScreen(navController: NavController) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                navController.navigate("editNote/${note.id}") // ✅ Navigate to edit screen
+                            },
                         elevation = CardDefaults.cardElevation(6.dp),
                         shape = MaterialTheme.shapes.medium,
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -96,10 +100,9 @@ fun NotesListScreen(navController: NavController) {
                                     text = note.title,
                                     style = MaterialTheme.typography.titleLarge
                                 )
-                                if (note.hasReminder == true) {
+                                if (note.hasReminder) {
                                     Text("⏰", fontSize = 18.sp)
                                 }
-
                             }
 
                             Spacer(modifier = Modifier.height(4.dp))
